@@ -28,7 +28,6 @@ public class FeatureLabelinginHTML {
 	static BufferedWriter specificationquads;
 	static BufferedWriter nqFilemappings;
 	static Annotation label;
-	static Scanner sc;
 	
 	static String outputFile="resources/JSON_LabelingOutput.txt";
 	static String productsPath="C:\\Users\\Anna\\Google Drive\\Master_Thesis\\DataToBeUsed\\CrawlerData\\part2_nq.txt";
@@ -42,6 +41,7 @@ public class FeatureLabelinginHTML {
 	static String sep="\\|\\|";
 	static ArrayList<String> labeledUrls = new ArrayList<String>();
 	private static Scanner input;
+	static Scanner sc;
 	
 	public static void main (String args[]) throws IOException, LangDetectException{
 		
@@ -143,7 +143,7 @@ public class FeatureLabelinginHTML {
 			}
 		}
 		reader.close();
-//		sc.close();
+		sc.close();
 //		json_obj.flush();
 //		json_obj.close();
 		specificationquads.flush();
@@ -157,11 +157,11 @@ public class FeatureLabelinginHTML {
 	
 	public void labelAllHTMLinDir (String directory, String productType) throws IOException{
 		
+		sc = new Scanner (System.in);
 		json_obj = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), "UTF-8"));
 
 		File folder = new File(directory);
 		File[] listOfFiles = folder.listFiles();
-		sc= new Scanner(System.in);
 	    for (int i = 0; i < listOfFiles.length; i++) {
 	    	
 	    	BufferedReader reader= new BufferedReader(new FileReader(new File(nqFileMap)));
@@ -191,6 +191,7 @@ public class FeatureLabelinginHTML {
 					} 
 			}
 			reader.close();
+			
 
 		}
 		System.out.println("The JSON objects are stored in the directory: resources/JSON.txt");
@@ -199,7 +200,6 @@ public class FeatureLabelinginHTML {
 	}
 	public void run (String warcPath) throws IOException, LangDetectException{
 		
-		sc = new Scanner(System.in);
 				
 		BufferedReader reader= new BufferedReader(new FileReader(new File(productsPath)));
 		json_obj = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), "UTF-8"));
@@ -235,15 +235,15 @@ public class FeatureLabelinginHTML {
 			} 
 		}
 		reader.close();
-		sc.close();
 		json_obj.flush();
 		json_obj.close();
 		System.out.println("The JSON objects are stored in the directory: resources/JSON.txt");
 		System.out.println("End of labeling process");
+		sc.close();
+
 
 	}
 	public void labelProduct(String line, String htmlpage) throws IOException {
-		Scanner scanner = new Scanner(System.in);
 		//subject+"|"+product+"|"+url+"|"+pld+"|gtin13:"+gtin13+"|gtin14:"+gtin14+"|title:"+title+"|description:"+
 		//description+"|"+lang	
 		String specs[] = line.split(sep);
@@ -273,31 +273,30 @@ public class FeatureLabelinginHTML {
 
 		System.out.println("Title:"+title);
 		System.out.println("Label the title? yes/no");
-		if(scanner.next().equals("yes"))
+		if(sc.next().equals("yes"))
 			parseText(title, true);
 
 		System.out.println("Description:"+description);
 		System.out.println("Label the description? yes/no");
-		if(scanner.next().equals("yes"))
+		if(sc.next().equals("yes"))
 			parseText(description, true);
 	
 		System.out.println("Label the tables? yes/no");
-		if(scanner.next().equals("yes")) ownParse("table");
+		if(sc.next().equals("yes")) ownParse("table");
 			//parseTable(doc);
 		
 		System.out.println("Label the lists? yes/no");
-		if(scanner.next().equals("yes"))  ownParse("list");
+		if(sc.next().equals("yes"))  ownParse("list");
 			//parseList(doc);
 					
 		JSONObject obj = utils.createJSON(label);
 		System.out.println(obj);
 		json_obj.append(obj.toString());
 		json_obj.newLine();	
-		scanner.close();
 	}
 
 	public  void parseTable(Document doc){
-		
+
 		if(sc.equals(null))
 		  sc= new Scanner(System.in);
 		
@@ -348,7 +347,7 @@ public class FeatureLabelinginHTML {
 	 * @throws IOException 
 	 */
 	public  void ownParse(String  structure) throws IOException{
-		
+
 		boolean mapsDone=false;
 		input = new Scanner(System.in);
 		ArrayList<String> elementsOfTable = new ArrayList<String>();
