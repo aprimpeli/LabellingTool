@@ -15,6 +15,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -30,7 +31,7 @@ public class FeatureLabelinginHTML {
 	static Annotation label;
 	
 	static String outputFile="resources/JSON_LabelingOutput.txt";
-	static String productsPath="C:\\Users\\Anna\\Google Drive\\Master_Thesis\\DataToBeUsed\\CrawlerData\\part2_nq.txt";
+	static String productsPath="C:\\Users\\Anna\\Google Drive\\Master_Thesis\\DataToBeUsed\\CrawlerData\\part3_nq.txt";
 	static String specFile = "resources/specificationQUADS.txt";
 	static String nqFileMap = "resources/nqFileMap.txt";
 	static String warcPath= "C:\\Users\\Anna\\Documents\\Student Job - DWS\\LabellingTool\\warc_February";
@@ -162,18 +163,25 @@ public class FeatureLabelinginHTML {
 
 		File folder = new File(directory);
 		File[] listOfFiles = folder.listFiles();
-	    for (int i = 0; i < listOfFiles.length; i++) {
+		System.out.println("Number of html files in the directory:"+listOfFiles.length);
+		//boolean passed= false;
+
+		for (int i = 0; i < listOfFiles.length; i++) {
 	    	
 	    	BufferedReader reader= new BufferedReader(new FileReader(new File(nqFileMap)));
 			String line="";
 			while ((  line = reader.readLine()) != null) {
 				String fileName= line.split("\\|\\|\\|\\|")[0];
 				if(fileName.equals(listOfFiles[i].getName())){
-					
+					//if (fileName.equals("samsung galaxy s6_106.html")) passed=true;
+					//if(!passed) continue;
+					System.out.println(line);
 					String []info = line.split("\\|\\|\\|\\|")[1].split("\\|\\|");
 				    String lang = info[info.length-2].trim();
+				    String pld = info[3];
 				    System.out.println(lang);
-				    if (lang.equals("English")){
+				    //comment out - only for ebay
+				    if (lang.equals("English") && pld.equals("ebay.com") ){
 				    	System.out.println(listOfFiles[i].getAbsolutePath());
 				    	System.out.println("Label the product?");
 				    	
@@ -181,7 +189,7 @@ public class FeatureLabelinginHTML {
 							//get the predefined Attributes
 							utils= new LabelUtils();
 							definedAttributes= utils.defineAttributes();
-							labelProduct(line.split("\\|\\|\\|\\|")[1], "resources/tempHTML.html");	
+							labelProduct(line.split("\\|\\|\\|\\|")[1], listOfFiles[i].getPath() );	
 							break;
 
 						}
@@ -282,7 +290,8 @@ public class FeatureLabelinginHTML {
 			parseText(description, true);
 	
 		System.out.println("Label the tables? yes/no");
-		if(sc.next().equals("yes")) ownParse("table");
+		if(sc.next().equals("yes")) wrapperParse("table",htmlpage,specs[3]);
+			//ownParse("table");
 			//parseTable(doc);
 		
 		System.out.println("Label the lists? yes/no");
@@ -341,6 +350,76 @@ public class FeatureLabelinginHTML {
 		}
 	}
 	
+	public void wrapperParse(String structure, String file, String pld) throws IOException{
+		
+		boolean mapsDone=false;
+		ArrayList<String> elementsOfTable = new ArrayList<String>();
+		Set<String> labels = new HashSet<String>();
+		
+		if(pld.equals("ebay.com")){
+			File file_ = new File(file);
+			Document doc = Jsoup.parse(file_,"UTF-8") ;
+			Element firstTable = doc.getElementsByClass("itemAttr").first();
+			if(null!=firstTable){
+				Elements items = firstTable.select("tr");
+				for(Element item:items){
+					Elements values= item.select("td");
+					if(values.size()!= 4) continue;
+					elementsOfTable.add(values.get(0).text()+values.get(1).text());
+					elementsOfTable.add(values.get(2).text()+values.get(3).text());
+					labels.add(values.get(0).text().replace(":", ""));
+					labels.add(values.get(2).text().replace(":", ""));
+					System.out.println(values.get(0).text()+values.get(1).text());
+					System.out.println(values.get(2).text()+values.get(3).text());
+					
+					if(values.get(0).text().replace(":", "").equals("mpn")) label.setMpn(values.get(1).text());
+					if(values.get(2).text().replace(":", "").equals("mpn")) label.setMpn(values.get(3).text());
+
+					//add to the list 
+					if(structure.equals("table")){
+						ArrayList<String> tempList= label.getTable_atts();
+						tempList.add(values.get(0).text()+values.get(1).text());
+						tempList.add(values.get(2).text()+values.get(3).text());
+						label.setTable_atts(tempList);	
+					}
+					}
+				
+			} 					
+			//detailed table
+			Element secondTable = doc.getElementsByClass("prodDetailSec").first();
+			if (null!=secondTable){
+				Elements detaileditems = secondTable.select("tr");
+				for(Element item:detaileditems){
+					Elements values = item.select("td");
+					if(values.size()!=2) continue;
+					else {
+						if (values.get(1).text().isEmpty() || values.get(1).text()==null ) continue;
+						elementsOfTable.add(values.get(0).text()+":"+values.get(1).text());
+						labels.add(values.get(0).text());
+						System.out.println(values.get(0).text()+":"+values.get(1).text());
+						if(values.get(0).text().equals("mpn")) label.setMpn(values.get(1).text());
+						if(structure.equals("table")){
+							ArrayList<String> tempList= label.getTable_atts();
+							tempList.add(values.get(0).text()+":"+values.get(1).text());
+							label.setTable_atts(tempList);	
+						}
+					}
+				}
+			}
+			System.out.println("Are the tables complete? (yes/no)");
+			input = new Scanner(System.in);
+			if(input.nextLine().equals("no")) ownParse("table");
+			else {
+				mapsDone = mapUndefinedLabels(labels);
+				if(!mapsDone)
+					System.out.println("Continue with labelling");
+			}
+						
+		}
+		
+		else ownParse("table");
+				
+	}
 	/**
 	 * @param structure
 	 * Searching one by one the tables and lists is time conuming. Better to do this manually
