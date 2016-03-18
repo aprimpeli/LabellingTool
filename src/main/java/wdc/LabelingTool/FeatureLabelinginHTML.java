@@ -39,7 +39,7 @@ public class FeatureLabelinginHTML {
 	
 	static HashMap<String, ArrayList<String>> definedAttributes = new HashMap<String, ArrayList<String>>();
 	static LabelUtils utils;
-	static String currentProductType="mobile";
+	static String currentProductType="mobile_phone";
 	static String sep="\\|\\|";
 	static ArrayList<String> labeledUrls = new ArrayList<String>();
 	private static Scanner input;
@@ -178,27 +178,23 @@ public class FeatureLabelinginHTML {
 					String []info = line.split("\\|\\|\\|\\|")[1].split("\\|\\|");
 				    String lang = info[info.length-2].trim();
 				    String pld = info[3];
-				    System.out.println(lang);
-					//check for german entries in table- ask user and if it indeed german ignore this html page
-				    
-				    if(pld.equals("overstock.com")){
-				    	System.out.println("The labels of the table are going to be checked for language consistency. Please proceed only if all the labels are in English.");
-						boolean onlyEnglish = utils.checkOverstockTable(listOfFiles[i].getPath());
-						if (!onlyEnglish){
-							System.out.println("Should you disregard the entry?(yes/no)");
-							if(sc.next().equals("yes")){
-								continue;
-							}							
-						}
-					}
-				    
-				    //comment out 
+			    
 				    if (lang.equals("English")  ){
 				    	System.out.println(listOfFiles[i].getAbsolutePath());
 				    	System.out.println("Label the product?");
 				    	
 						if(sc.next().equals("yes")){
-							
+							//check for german entries in table- ask user and if it indeed german ignore this html page				    
+						    if(pld.equals("overstock.com")){
+						    	System.out.println("The labels of the table are going to be checked for language consistency. Please proceed only if all the labels are in English.");
+								boolean onlyEnglish = utils.checkOverstockTable(listOfFiles[i].getPath());
+								if (!onlyEnglish){
+									System.out.println("Should you disregard the entry?(yes/no)");
+									if(sc.next().equals("yes")){
+										continue;
+									}							
+								}
+							}
 							//get the predefined Attributes
 							utils= new LabelUtils();
 							definedAttributes= utils.defineAttributes();
@@ -433,7 +429,7 @@ public class FeatureLabelinginHTML {
 		else if (pld.equals("overstock.com")){
 			File file_ = new File(file);
 			Document doc = Jsoup.parse(file_,"UTF-8") ;
-			Element firstTable = doc.getElementsByClass("table table-dotted table-extended table-header translation-table").first();
+			Element firstTable = doc.select("table[class=table table-dotted table-extended table-header translation-table]").first();
 			Element content = firstTable.select("tbody").first();
 			if(null!=content){
 				Elements items = content.select("tr");
@@ -442,10 +438,10 @@ public class FeatureLabelinginHTML {
 					if(values.size()!= 2) continue;
 					
 					elementsOfTable.add(values.get(0).text()+values.get(1).text());
-					labels.add(values.get(0).text().replace(":", ""));
-					System.out.println(values.get(0).text()+values.get(1).text());
+					labels.add(values.get(0).text());
+					System.out.println(values.get(0).text()+":"+values.get(1).text());
 					
-					if(values.get(0).text().replace(":", "").equals("mpn")) label.setMpn(values.get(1).text());
+					if(values.get(0).text().equals("mpn")) label.setMpn(values.get(1).text());
 
 					//add to the list 
 					if(structure.equals("table")){
@@ -453,9 +449,36 @@ public class FeatureLabelinginHTML {
 						tempList.add(values.get(0).text()+values.get(1).text());
 						label.setTable_atts(tempList);	
 					}
+					}	
+				Element secondTable = doc.select("table[class=table table-dotted table-header]").first();
+				Elements seconditems = secondTable.select("tr");
+				if(null!=content){
+					for(Element item:seconditems){
+						Elements values= item.select("td");
+						if(values.size()!= 2) continue;		
+						elementsOfTable.add(values.get(0).text()+values.get(1).text());
+						labels.add(values.get(0).text());
+						System.out.println(values.get(0).text()+":"+values.get(1).text());		
+						if(values.get(0).text().equals("mpn")) label.setMpn(values.get(1).text());
+
+						//add to the list 
+						if(structure.equals("table")){
+							ArrayList<String> tempList= label.getTable_atts();
+							tempList.add(values.get(0).text()+values.get(1).text());
+							label.setTable_atts(tempList);	
+						}
 					}
-				
-			} 					
+					
+				} 
+			} 	
+			System.out.println("Are the tables complete? (yes/no)");
+			input = new Scanner(System.in);
+			if(input.nextLine().equals("no")) ownParse("table");
+			else {
+				mapsDone = mapUndefinedLabels(labels);
+				if(!mapsDone)
+					System.out.println("Continue with labelling");
+			}
 		}
 		else ownParse("table");
 				
