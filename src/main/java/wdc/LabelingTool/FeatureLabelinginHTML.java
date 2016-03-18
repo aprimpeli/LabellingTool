@@ -20,6 +20,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.cybozu.labs.langdetect.DetectorFactory;
 import com.cybozu.labs.langdetect.LangDetectException;
 
 public class FeatureLabelinginHTML {
@@ -31,14 +32,14 @@ public class FeatureLabelinginHTML {
 	static Annotation label;
 	
 	static String outputFile="resources/JSON_LabelingOutput.txt";
-	static String productsPath="C:\\Users\\Anna\\Google Drive\\Master_Thesis\\DataToBeUsed\\CrawlerData\\part3_nq.txt";
+	static String productsPath="C:\\Users\\Anna\\Google Drive\\Master_Thesis\\DataToBeUsed\\CrawlerData\\phones\\part4_nq.txt";
 	static String specFile = "resources/specificationQUADS.txt";
 	static String nqFileMap = "resources/nqFileMap.txt";
-	static String warcPath= "C:\\Users\\Anna\\Documents\\Student Job - DWS\\LabellingTool\\warc_February";
+	static String warcPath= "C:\\Users\\Anna\\Documents\\Student Job - DWS\\LabellingTool\\phone-data\\warc";
 	
 	static HashMap<String, ArrayList<String>> definedAttributes = new HashMap<String, ArrayList<String>>();
 	static LabelUtils utils;
-	static String currentProductType="mobile_phone";
+	static String currentProductType="mobile";
 	static String sep="\\|\\|";
 	static ArrayList<String> labeledUrls = new ArrayList<String>();
 	private static Scanner input;
@@ -68,6 +69,8 @@ public class FeatureLabelinginHTML {
 			String language = line.split(sep)[8];
 			if(!language.equals("English")) continue;
 			String url=line.split(sep)[2];
+			String pld= line.split(sep)[3];
+			if(pld.equals("ebay.com")) continue;
 			if(labeledUrls.contains(url)) System.out.println("URL: "+url+" appears twice! Please check!");
 			labeledUrls.add(url);
 			String nqFile=line.split(sep)[9];
@@ -89,13 +92,7 @@ public class FeatureLabelinginHTML {
 				if (answer.equals("no")) continue;
 			}
 			
-//			//check the title for forbidden words - PHONES (smartphones for the listing)
-			if (title.contains("battery") || title.contains("cable") 
-					||title.contains("charg") || title.contains("digitizer") || title.contains("case")||
-					title.contains("headphone") || title.contains("protect") ||
-					title.contains("smartphones") || title.contains("bluetooth") || title.contains("lens") || title.contains("adapter")
-					||title.contains("holder") || title.contains("earphone") || title.contains("headset") || title.contains("tripod")|| 
-					title.contains("armband")) continue;
+//			
 			
 			//get the html content of the current url and store it in a temporal file
 			Integer count = htmlPagesNames.get(productName);
@@ -156,8 +153,10 @@ public class FeatureLabelinginHTML {
 
 	}
 	
-	public void labelAllHTMLinDir (String directory, String productType) throws IOException{
+	public void labelAllHTMLinDir (String directory, String productType) throws IOException, LangDetectException{
 		
+		DetectorFactory.loadProfile("resources\\LanguageDetection\\profiles");			
+		utils = new LabelUtils();
 		sc = new Scanner (System.in);
 		json_obj = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), "UTF-8"));
 
@@ -180,12 +179,26 @@ public class FeatureLabelinginHTML {
 				    String lang = info[info.length-2].trim();
 				    String pld = info[3];
 				    System.out.println(lang);
-				    //comment out - only for ebay
-				    if (lang.equals("English") && pld.equals("ebay.com") ){
+					//check for german entries in table- ask user and if it indeed german ignore this html page
+				    
+				    if(pld.equals("overstock.com")){
+				    	System.out.println("The labels of the table are going to be checked for language consistency. Please proceed only if all the labels are in English.");
+						boolean onlyEnglish = utils.checkOverstockTable(listOfFiles[i].getPath());
+						if (!onlyEnglish){
+							System.out.println("Should you disregard the entry?(yes/no)");
+							if(sc.next().equals("yes")){
+								continue;
+							}							
+						}
+					}
+				    
+				    //comment out 
+				    if (lang.equals("English")  ){
 				    	System.out.println(listOfFiles[i].getAbsolutePath());
 				    	System.out.println("Label the product?");
 				    	
 						if(sc.next().equals("yes")){
+							
 							//get the predefined Attributes
 							utils= new LabelUtils();
 							definedAttributes= utils.defineAttributes();
@@ -252,6 +265,7 @@ public class FeatureLabelinginHTML {
 
 	}
 	public void labelProduct(String line, String htmlpage) throws IOException {
+		
 		//subject+"|"+product+"|"+url+"|"+pld+"|gtin13:"+gtin13+"|gtin14:"+gtin14+"|title:"+title+"|description:"+
 		//description+"|"+lang	
 		String specs[] = line.split(sep);
@@ -416,7 +430,33 @@ public class FeatureLabelinginHTML {
 			}
 						
 		}
-		
+		else if (pld.equals("overstock.com")){
+			File file_ = new File(file);
+			Document doc = Jsoup.parse(file_,"UTF-8") ;
+			Element firstTable = doc.getElementsByClass("table table-dotted table-extended table-header translation-table").first();
+			Element content = firstTable.select("tbody").first();
+			if(null!=content){
+				Elements items = content.select("tr");
+				for(Element item:items){
+					Elements values= item.select("td");
+					if(values.size()!= 2) continue;
+					
+					elementsOfTable.add(values.get(0).text()+values.get(1).text());
+					labels.add(values.get(0).text().replace(":", ""));
+					System.out.println(values.get(0).text()+values.get(1).text());
+					
+					if(values.get(0).text().replace(":", "").equals("mpn")) label.setMpn(values.get(1).text());
+
+					//add to the list 
+					if(structure.equals("table")){
+						ArrayList<String> tempList= label.getTable_atts();
+						tempList.add(values.get(0).text()+values.get(1).text());
+						label.setTable_atts(tempList);	
+					}
+					}
+				
+			} 					
+		}
 		else ownParse("table");
 				
 	}

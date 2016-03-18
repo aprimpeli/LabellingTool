@@ -2,7 +2,9 @@ package wdc.LabelingTool;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -14,6 +16,10 @@ import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import com.cybozu.labs.langdetect.Detector;
 import com.cybozu.labs.langdetect.DetectorFactory;
@@ -240,5 +246,43 @@ public class LabelUtils {
 		 
 		 
 		
+	}
+
+	
+	public boolean checkOverstockTable(String path) throws IOException {
+		File file_ = new File(path);
+		Document doc = Jsoup.parse(file_,"UTF-8") ;
+		//div[class=listing category_templates clearfix shelfListing  multiSaveListing]
+		Element firstTable = doc.select("table[class=table table-dotted table-extended table-header translation-table]").first();
+		Element content = firstTable.select("tbody").first();
+		boolean onlyEnglish= true;
+		if(null!=content){
+			Elements items = content.select("tr");
+			for(Element item:items){
+				Elements values= item.select("td");
+				if(values.size()!= 2) continue;			
+				String lang= langDetector(values.get(0).text());
+				if(!lang.equals("English")){
+					System.out.println(values.get(0).text()+":"+lang);
+					onlyEnglish=false;
+				}
+			}			
+		} 
+		//table table-dotted table-header
+		Element secondTable = doc.select("table[class=table table-dotted table-header]").first();
+		Elements seconditems = secondTable.select("tr");
+		if(null!=content){
+			for(Element item:seconditems){
+				Elements values= item.select("td");
+				if(values.size()!= 2) continue;			
+				String lang= langDetector(values.get(0).text());
+				if(!lang.equals("English")){
+					System.out.println(values.get(0).text()+":"+lang);
+					onlyEnglish=false;
+				}
+			}
+			
+		} 
+		return onlyEnglish;
 	}
 }
