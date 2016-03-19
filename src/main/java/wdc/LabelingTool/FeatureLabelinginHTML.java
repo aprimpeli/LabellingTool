@@ -163,7 +163,7 @@ public class FeatureLabelinginHTML {
 		File folder = new File(directory);
 		File[] listOfFiles = folder.listFiles();
 		System.out.println("Number of html files in the directory:"+listOfFiles.length);
-		//boolean passed= false;
+		boolean passed= false;
 
 		for (int i = 0; i < listOfFiles.length; i++) {
 	    	
@@ -172,8 +172,8 @@ public class FeatureLabelinginHTML {
 			while ((  line = reader.readLine()) != null) {
 				String fileName= line.split("\\|\\|\\|\\|")[0];
 				if(fileName.equals(listOfFiles[i].getName())){
-					//if (fileName.equals("iphone 5s_6.html")) passed=true;
-					//if(!passed) continue;
+					if (fileName.equals("iphone 5_14.html")) passed=true;
+					if(!passed) continue;
 					System.out.println(line);
 					String []info = line.split("\\|\\|\\|\\|")[1].split("\\|\\|");
 				    String lang = info[info.length-2].trim();
@@ -297,7 +297,7 @@ public class FeatureLabelinginHTML {
 		System.out.println("Description:"+description);
 		System.out.println("Label the description? yes/no");
 		if(sc.next().equals("yes"))
-			parseText(description, true);
+			parseText(description, false);
 	
 		System.out.println("Label the tables? yes/no");
 		if(sc.next().equals("yes")) wrapperParse("table",htmlpage,specs[3]);
