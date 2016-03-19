@@ -32,7 +32,7 @@ public class FeatureLabelinginHTML {
 	static Annotation label;
 	
 	static String outputFile="resources/JSON_LabelingOutput.txt";
-	static String productsPath="C:\\Users\\Anna\\Google Drive\\Master_Thesis\\DataToBeUsed\\CrawlerData\\phones\\part4_nq.txt";
+	static String productsPath="C:\\Users\\Anna\\Google Drive\\Master_Thesis\\DataToBeUsed\\CrawlerData\\phones\\part5_nq.txt";
 	static String specFile = "resources/specificationQUADS.txt";
 	static String nqFileMap = "resources/nqFileMap.txt";
 	static String warcPath= "C:\\Users\\Anna\\Documents\\Student Job - DWS\\LabellingTool\\phone-data\\warc";
@@ -172,7 +172,7 @@ public class FeatureLabelinginHTML {
 			while ((  line = reader.readLine()) != null) {
 				String fileName= line.split("\\|\\|\\|\\|")[0];
 				if(fileName.equals(listOfFiles[i].getName())){
-					//if (fileName.equals("samsung galaxy s6_106.html")) passed=true;
+					//if (fileName.equals("iphone 5s_6.html")) passed=true;
 					//if(!passed) continue;
 					System.out.println(line);
 					String []info = line.split("\\|\\|\\|\\|")[1].split("\\|\\|");
@@ -478,6 +478,41 @@ public class FeatureLabelinginHTML {
 				mapsDone = mapUndefinedLabels(labels);
 				if(!mapsDone)
 					System.out.println("Continue with labelling");
+			}
+		}
+		if (pld.equals("tesco.com")){
+			File file_ = new File(file);
+			Document doc = Jsoup.parse(file_,"UTF-8") ;
+			Element table = doc.select("div[id=product-spec-section-content]").first();
+			if(null!=table){
+
+				Elements labelCells = table.select("div[class=product-spec-cell product-spec-label]");
+				Elements labelValues = table.select("div[class=product-spec-cell product-spec-value]");
+				if (labelCells.size()!= labelValues.size()) System.out.println("The labels size and the value size do not match. Please check the Tesco wrapper.");
+				for(int i=0; i<labelCells.size(); i++){
+					String value= labelValues.get(i).text();
+					String label_ = labelCells.get(i).text();
+					elementsOfTable.add(label_+":"+value);
+					labels.add(label_);
+					System.out.println(label_+":"+value);
+					
+					if(label.equals("mpn")) label.setMpn(value);
+
+					//add to the list 
+					if(structure.equals("table")){
+						ArrayList<String> tempList= label.getTable_atts();
+						tempList.add(label_+":"+value);
+						label.setTable_atts(tempList);	
+					}
+				}	
+				System.out.println("Are the tables complete? (yes/no)");
+				input = new Scanner(System.in);
+				if(input.nextLine().equals("no")) ownParse("table");
+				else {
+					mapsDone = mapUndefinedLabels(labels);
+					if(!mapsDone)
+						System.out.println("Continue with labelling");
+				}
 			}
 		}
 		else ownParse("table");
