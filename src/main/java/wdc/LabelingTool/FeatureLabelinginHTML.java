@@ -20,6 +20,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.cybozu.labs.langdetect.DetectorFactory;
 import com.cybozu.labs.langdetect.LangDetectException;
 
 public class FeatureLabelinginHTML {
@@ -31,10 +32,10 @@ public class FeatureLabelinginHTML {
 	static Annotation label;
 	
 	static String outputFile="resources/JSON_LabelingOutput.txt";
-	static String productsPath="C:\\Users\\Anna\\Google Drive\\Master_Thesis\\DataToBeUsed\\CrawlerData\\part3_nq.txt";
+	static String productsPath="C:\\Users\\Anna\\Google Drive\\Master_Thesis\\DataToBeUsed\\CrawlerData\\phones\\part5_nq.txt";
 	static String specFile = "resources/specificationQUADS.txt";
 	static String nqFileMap = "resources/nqFileMap.txt";
-	static String warcPath= "C:\\Users\\Anna\\Documents\\Student Job - DWS\\LabellingTool\\warc_February";
+	static String warcPath= "C:\\Users\\Anna\\Documents\\Student Job - DWS\\LabellingTool\\phone-data\\warc";
 	
 	static HashMap<String, ArrayList<String>> definedAttributes = new HashMap<String, ArrayList<String>>();
 	static LabelUtils utils;
@@ -68,6 +69,8 @@ public class FeatureLabelinginHTML {
 			String language = line.split(sep)[8];
 			if(!language.equals("English")) continue;
 			String url=line.split(sep)[2];
+			String pld= line.split(sep)[3];
+			if(pld.equals("ebay.com")) continue;
 			if(labeledUrls.contains(url)) System.out.println("URL: "+url+" appears twice! Please check!");
 			labeledUrls.add(url);
 			String nqFile=line.split(sep)[9];
@@ -89,13 +92,7 @@ public class FeatureLabelinginHTML {
 				if (answer.equals("no")) continue;
 			}
 			
-//			//check the title for forbidden words - PHONES (smartphones for the listing)
-			if (title.contains("battery") || title.contains("cable") 
-					||title.contains("charg") || title.contains("digitizer") || title.contains("case")||
-					title.contains("headphone") || title.contains("protect") ||
-					title.contains("smartphones") || title.contains("bluetooth") || title.contains("lens") || title.contains("adapter")
-					||title.contains("holder") || title.contains("earphone") || title.contains("headset") || title.contains("tripod")|| 
-					title.contains("armband")) continue;
+//			
 			
 			//get the html content of the current url and store it in a temporal file
 			Integer count = htmlPagesNames.get(productName);
@@ -156,15 +153,17 @@ public class FeatureLabelinginHTML {
 
 	}
 	
-	public void labelAllHTMLinDir (String directory, String productType) throws IOException{
+	public void labelAllHTMLinDir (String directory, String productType) throws IOException, LangDetectException{
 		
+		DetectorFactory.loadProfile("resources\\LanguageDetection\\profiles");			
+		utils = new LabelUtils();
 		sc = new Scanner (System.in);
 		json_obj = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), "UTF-8"));
 
 		File folder = new File(directory);
 		File[] listOfFiles = folder.listFiles();
 		System.out.println("Number of html files in the directory:"+listOfFiles.length);
-		//boolean passed= false;
+		boolean passed= false;
 
 		for (int i = 0; i < listOfFiles.length; i++) {
 	    	
@@ -173,19 +172,29 @@ public class FeatureLabelinginHTML {
 			while ((  line = reader.readLine()) != null) {
 				String fileName= line.split("\\|\\|\\|\\|")[0];
 				if(fileName.equals(listOfFiles[i].getName())){
-					//if (fileName.equals("samsung galaxy s6_106.html")) passed=true;
-					//if(!passed) continue;
+					if (fileName.equals("iphone 5_14.html")) passed=true;
+					if(!passed) continue;
 					System.out.println(line);
 					String []info = line.split("\\|\\|\\|\\|")[1].split("\\|\\|");
 				    String lang = info[info.length-2].trim();
 				    String pld = info[3];
-				    System.out.println(lang);
-				    //comment out - only for ebay
-				    if (lang.equals("English") && pld.equals("ebay.com") ){
+			    
+				    if (lang.equals("English")  ){
 				    	System.out.println(listOfFiles[i].getAbsolutePath());
 				    	System.out.println("Label the product?");
 				    	
 						if(sc.next().equals("yes")){
+							//check for german entries in table- ask user and if it indeed german ignore this html page				    
+						    if(pld.equals("overstock.com")){
+						    	System.out.println("The labels of the table are going to be checked for language consistency. Please proceed only if all the labels are in English.");
+								boolean onlyEnglish = utils.checkOverstockTable(listOfFiles[i].getPath());
+								if (!onlyEnglish){
+									System.out.println("Should you disregard the entry?(yes/no)");
+									if(sc.next().equals("yes")){
+										continue;
+									}							
+								}
+							}
 							//get the predefined Attributes
 							utils= new LabelUtils();
 							definedAttributes= utils.defineAttributes();
@@ -252,6 +261,7 @@ public class FeatureLabelinginHTML {
 
 	}
 	public void labelProduct(String line, String htmlpage) throws IOException {
+		
 		//subject+"|"+product+"|"+url+"|"+pld+"|gtin13:"+gtin13+"|gtin14:"+gtin14+"|title:"+title+"|description:"+
 		//description+"|"+lang	
 		String specs[] = line.split(sep);
@@ -287,7 +297,7 @@ public class FeatureLabelinginHTML {
 		System.out.println("Description:"+description);
 		System.out.println("Label the description? yes/no");
 		if(sc.next().equals("yes"))
-			parseText(description, true);
+			parseText(description, false);
 	
 		System.out.println("Label the tables? yes/no");
 		if(sc.next().equals("yes")) wrapperParse("table",htmlpage,specs[3]);
@@ -416,7 +426,95 @@ public class FeatureLabelinginHTML {
 			}
 						
 		}
-		
+		else if (pld.equals("overstock.com")){
+			File file_ = new File(file);
+			Document doc = Jsoup.parse(file_,"UTF-8") ;
+			Element firstTable = doc.select("table[class=table table-dotted table-extended table-header translation-table]").first();
+			Element content = firstTable.select("tbody").first();
+			if(null!=content){
+				Elements items = content.select("tr");
+				for(Element item:items){
+					Elements values= item.select("td");
+					if(values.size()!= 2) continue;
+					
+					elementsOfTable.add(values.get(0).text()+values.get(1).text());
+					labels.add(values.get(0).text());
+					System.out.println(values.get(0).text()+":"+values.get(1).text());
+					
+					if(values.get(0).text().equals("mpn")) label.setMpn(values.get(1).text());
+
+					//add to the list 
+					if(structure.equals("table")){
+						ArrayList<String> tempList= label.getTable_atts();
+						tempList.add(values.get(0).text()+values.get(1).text());
+						label.setTable_atts(tempList);	
+					}
+					}	
+				Element secondTable = doc.select("table[class=table table-dotted table-header]").first();
+				Elements seconditems = secondTable.select("tr");
+				if(null!=content){
+					for(Element item:seconditems){
+						Elements values= item.select("td");
+						if(values.size()!= 2) continue;		
+						elementsOfTable.add(values.get(0).text()+values.get(1).text());
+						labels.add(values.get(0).text());
+						System.out.println(values.get(0).text()+":"+values.get(1).text());		
+						if(values.get(0).text().equals("mpn")) label.setMpn(values.get(1).text());
+
+						//add to the list 
+						if(structure.equals("table")){
+							ArrayList<String> tempList= label.getTable_atts();
+							tempList.add(values.get(0).text()+values.get(1).text());
+							label.setTable_atts(tempList);	
+						}
+					}
+					
+				} 
+			} 	
+			System.out.println("Are the tables complete? (yes/no)");
+			input = new Scanner(System.in);
+			if(input.nextLine().equals("no")) ownParse("table");
+			else {
+				mapsDone = mapUndefinedLabels(labels);
+				if(!mapsDone)
+					System.out.println("Continue with labelling");
+			}
+		}
+		if (pld.equals("tesco.com")){
+			File file_ = new File(file);
+			Document doc = Jsoup.parse(file_,"UTF-8") ;
+			Element table = doc.select("div[id=product-spec-section-content]").first();
+			if(null!=table){
+
+				Elements labelCells = table.select("div[class=product-spec-cell product-spec-label]");
+				Elements labelValues = table.select("div[class=product-spec-cell product-spec-value]");
+				if (labelCells.size()!= labelValues.size()) System.out.println("The labels size and the value size do not match. Please check the Tesco wrapper.");
+				for(int i=0; i<labelCells.size(); i++){
+					String value= labelValues.get(i).text();
+					String label_ = labelCells.get(i).text();
+					elementsOfTable.add(label_+":"+value);
+					labels.add(label_);
+					System.out.println(label_+":"+value);
+					
+					if(label.equals("mpn")) label.setMpn(value);
+
+					//add to the list 
+					if(structure.equals("table")){
+						ArrayList<String> tempList= label.getTable_atts();
+						tempList.add(label_+":"+value);
+						label.setTable_atts(tempList);	
+					}
+				}	
+				System.out.println("Are the tables complete? (yes/no)");
+				input = new Scanner(System.in);
+				if(input.nextLine().equals("no")) ownParse("table");
+				else {
+					mapsDone = mapUndefinedLabels(labels);
+					if(!mapsDone)
+						System.out.println("Continue with labelling");
+				}
+			}
+		}
 		else ownParse("table");
 				
 	}

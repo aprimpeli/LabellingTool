@@ -25,6 +25,6 @@
 	<classpathentry kind="lib" path="resources/jars/loddesc-core-0.1-with-dependencies.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="libraries/JSONlib_modified.jar"/>
-	<classpathentry kind="lib" path="libraries/QuadHelper-0.0.1-SNAPSHOT-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="libraries/QuadHelper-0.0.1-SNAPSHOT-jar-with-dependencies.jar" sourcepath="/dpef"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

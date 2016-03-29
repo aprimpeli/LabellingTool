@@ -18,6 +18,8 @@ import ldif.entity.NodeTrait;
 import org.webdatacommons.structureddata.EntityProcessor;
 import org.webdatacommons.structureddata.model.Entity;
 
+import wdc.Utils.NQProcessor;
+
 import com.cybozu.labs.langdetect.DetectorFactory;
 
 import de.dwslab.dwslib.util.io.InputUtil;
@@ -35,6 +37,7 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 	static BufferedWriter temp_writer;
 	static BufferedWriter writer;
 	static ArrayList<String> products;
+	static ArrayList<String> forbiddenWords;
 	static LabelUtils utils;
 	static int entitiesProcessed=0;
 	static String currentNQFile;
@@ -64,9 +67,9 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 
 	public static void main(String[] args) throws Exception {
 		//get which products you want to retrieve (test, tv, laptop, mobiles, all)
-		String whichProducts="mobile_phone";
+		String whichProducts="headset";
 		//path to the guads file
-		String quadsFolder= "C:\\Users\\Anna\\Documents\\Student Job - DWS\\LabellingTool\\data";
+		String quadsFolder= "C:\\Users\\Anna\\Documents\\Student Job - DWS\\LabellingTool\\headphones-data\\nq";
 		
 		//for the language detection
 		DetectorFactory.loadProfile("resources\\LanguageDetection\\profiles");			
@@ -78,6 +81,7 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 		
 		products= getEntityNames(whichProducts);
 		products = changeToLowerCase(products);
+		forbiddenWords = getForbiddenWords(whichProducts);
 		//findProductsInQuadsFile(quadsFolder);
 		findProductsInQuadsFileQuadHelper(quadsFolder);
 		
@@ -88,17 +92,52 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 		System.out.println("Processed Entities:"+entitiesProcessed);
 	}
 
+	
+	private static ArrayList<String> getForbiddenWords(String whichProducts) {
+		forbiddenWords= new ArrayList<String>();
+		if(whichProducts.equals("mobile_phone")){
+			forbiddenWords.add("battery");
+			forbiddenWords.add("cable");
+			forbiddenWords.add("charg");
+			forbiddenWords.add("digitizer");
+			forbiddenWords.add("case");
+			forbiddenWords.add("headphone");
+			forbiddenWords.add("protect");
+			forbiddenWords.add("smartphones");
+			forbiddenWords.add("bluetooth");
+			forbiddenWords.add("lens");
+			forbiddenWords.add("adapter");
+			forbiddenWords.add("holder");
+			forbiddenWords.add("earphone");
+			forbiddenWords.add("headset");
+			forbiddenWords.add("tripod");
+			forbiddenWords.add("armband");
+		}
+		else if (whichProducts.equals("headset")){
+			
+		}
+		else if (whichProducts.equals("television")){
+			
+		}
+		else System.out.println("The type of products "+whichProducts+" cannot be processed by the labelling tool. Please check spelling");
+		return forbiddenWords;
+	}
+
 	//alternative implementation using QuadHelper project
 	private static void findProductsInQuadsFileQuadHelper(String folderPath) throws Exception{
 
 		//list all files in quads directory		
 		EntitiesInspectorNQuads processor= new EntitiesInspectorNQuads(folderPath,"resources/output.txt",1);
-		List<File> inputFiles = processor.fillListToProcess();		
+		List<File> inputFiles = processor.fillListToProcess();	
+		NQProcessor sort = new NQProcessor();
 		for (File f:inputFiles){
 			System.out.println("Process file:"+f.getName());
 			//the process method only loads the map of entities 
 			currentNQFile=f.getName();
-			processor.process(f);			
+			System.out.println("Sort the file first");
+			sort.sortLinesOfFile(f.getPath());
+			File sortedFile= new File("resources/sortedNQFile.gz");
+			processor.process(sortedFile);			
 		}
 		
 	}
@@ -113,7 +152,19 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 				String description="";
 				Map<String,List<NodeTrait>> predicates = e.getProperties();
 				boolean toBeSearched=false;
+				
+				
+					
+//					for(Map.Entry<String, List<NodeTrait>> p: predicates.entrySet()){
+//						System.out.println(p.getKey());
+//						for(NodeTrait n:p.getValue()){
+//							System.out.println(n.toString());
+//							System.out.println(n.value());
+//						}
+//					}
+				
 
+				
 				if(predicates.containsKey("http://schema.org/Product/name")){
 					toBeSearched=true;
 					for (NodeTrait o: predicates.get("http://schema.org/Product/name")){
@@ -129,27 +180,35 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 				}
 				if(toBeSearched){
 					entitiesTobeSearched++;
-					for (String product:products){	
+					for (String product:products){
+						if(product.equals("sony xbr43v830c")) {
+							System.out.println("watch out");}
 						//calculate containment of arraylists
 						String pr_description = description.toLowerCase().trim();
+						
 						String pr_title = title.toLowerCase().trim();
 						ArrayList<String> productAsArray = new ArrayList<String>(Arrays.asList(product.toLowerCase().split(" ")));
 						ArrayList<String> descriptionAsArray = new ArrayList<String>(Arrays.asList(pr_description.split(" ")));
 						ArrayList<String> titleAsArray = new ArrayList<String>(Arrays.asList(pr_title.split(" ")));
 
-						if (descriptionAsArray.containsAll(productAsArray) || titleAsArray.containsAll(productAsArray) ){
+						if ((descriptionAsArray.containsAll(productAsArray) || titleAsArray.containsAll(productAsArray)) ||
+								(pr_description.contains(product.toLowerCase()))	)		
+						{
 						//replace with the previous line if you want to be more flexible when it comes to the title
 //						if ((description.toLowerCase().trim().contains(product.toLowerCase())) || 
 //								title.toLowerCase().trim().contains(product.toLowerCase())){
 						//choose one of the three if clauses above
 //								if (predicate.endsWith("/name") && object.toLowerCase().equals(product.toLowerCase())){
 //									//get uri and pld
-							if (pr_title.contains("battery") || pr_title.contains("cable") 
-									||pr_title.contains("charg") || pr_title.contains("digitizer") || pr_title.contains("case")||
-									pr_title.contains("headphone") || pr_title.contains("protect") ||
-									pr_title.contains("smartphones") || pr_title.contains("bluetooth") || pr_title.contains("lens") || pr_title.contains("adapter")
-									||pr_title.contains("holder") || pr_title.contains("earphone") || pr_title.contains("headset") || pr_title.contains("tripod")|| 
-									pr_title.contains("armband")) continue;
+							boolean containsCrappyWord=false;
+							for(String forbidden:forbiddenWords){
+								if (pr_title.contains(forbidden)) {
+									containsCrappyWord=true;
+									break;
+								}
+							}
+							if (containsCrappyWord) continue;
+							
 							//URL
 							String url=e.getGraph();
 							String domain = de.wbsg.loddesc.util.DomainUtils.getDomain(url);
@@ -275,62 +334,34 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 			requiredList = new ArrayList<String>() {
 				private static final long serialVersionUID = 1L;
 			{
-			    add("VIZIO E231i-B1");
-			    add("VIZIO P602ui-B3");
-			    add("Vizio M471I-A");
-			    add("VIZIO E390-B1E");
-			    add("Samsung UN39FH5000");
-			    add("Samsung PN51F4500");
-			    add("Samsung UN32EH5300");
-			    add("Samsung PN51F5300");
-			    add("Samsung UN60EH600");
-			    add("LG LA6200");
-			    add("LG M2752D-PZ");
-			    add("LG LN575V");
-			    add("LG LS349C");
-			    add("LG PN450P");
-			    add("Toshiba 50L2200U");
-			    add("Toshiba 40L5200U");
-			    add("Toshiba 50PN6500");
-			    add("LG 60PN6500");
-			    add("Sharp LC60LE640U");
-			    add("Sharp LC60LE650U");
-			    add("Panasonic TC-P60S60");
-			    add("Sony KDL32R400A");
-			    add("Viewsonic PJD5134");
-			    add("Philips PFL4508");
-			    add("Philips PFL4505D");
+			    add("Sony XBR43X830C");
+			    add("LG 55EG9600");
+			    add("LG 65EG9600");
+			    add("Sony XBR55X850D");
+			    add("Samsung UN50HU6900F");
+			    add("Samsung UN40JU6400F");
+			    add("Gpx Tde1384b");
+			    add("Samsung UN60JS7000F");
+			    add("VIZIO D43-C1");
+			    add("LG 43UF6400");
+			    
 			}};
 			allProducts.addAll(requiredList);
 		}
-		if(whichEntities.equals("laptop") || whichEntities.equals("all")){
+		if(whichEntities.equals("headset") || whichEntities.equals("all")){
 			requiredList= new ArrayList<String>(){
 				private static final long serialVersionUID = 1L;{
-				add("Apple MacBook Pro MC371B/A");
-				add("Apple MacBook Pro ME664B/A");
-				add("Apple MacBook Pro (13”/15”/17”)");
-				add("Macbook Pro Md313ll/A ");
-				add("Macbook Pro MGXA2LL/A");
-				add("Lenovo Essential G50");
-				add("Lenovo ThinkPad Edge E440 20C50052U");
-				add("Lenovo ThinkPad L440");
-				add("Lenovo Thinkpad L540");
-				add("Lenovo ThinkPad T440s");
-				add("Lenovo ThinkPad W540");
-				add("Lenovo ThinkPad X140e");
-				add("Lenovo Y50");
-				add("HP EliteBook 820 G1");
-				add("HP EliteBook 840 G1");
-				add("Sony VAIO VPCYB35KX/P");
-				add("Sony Vaio VGN-TT11");
-				add("ASUS Zenbook UX32A");
-				add("ASUS C200MA-DS01");
-				add("ASUS X200CA-DH21T");
-				add("HP Pavilion QD992UAR");
-				add("Toshiba CB35-A");
-				add("Acer Aspire One AO756-B847Xbb");
-				add("Acer Aspire V5-531P-987B4G50");
-				add("Acer Aspire One AO756-987BXkk");
+				add("Shure SE215");
+				add("Audio Technica ATH-M50X");
+				add("Shure SRH440");
+				add("Grado SR 60e");
+				add("Sennheiser CX 3.00");
+				add("Sennheiser Momentum 2.0");
+				add("OPPO PM-3 Closed Back Planar");
+				add("Shure SE425");
+				add("Sennheiser HD 650");
+				add("AKG K712 Pro");
+				
 			}};
 			allProducts.addAll(requiredList);
 
@@ -338,7 +369,6 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 		if(whichEntities.equals("mobile_phone") || whichEntities.equals("all")){
 			requiredList= new ArrayList<String>(){
 				private static final long serialVersionUID = 1L;{
-					//deleted memory details from i-phones- check google docs
 				add("iphone 4");;
 				add("iphone 6");
 				add("iphone 6 plus");

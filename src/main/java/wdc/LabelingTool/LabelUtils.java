@@ -2,7 +2,9 @@ package wdc.LabelingTool;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -14,6 +16,10 @@ import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import com.cybozu.labs.langdetect.Detector;
 import com.cybozu.labs.langdetect.DetectorFactory;
@@ -88,7 +94,7 @@ public class LabelUtils {
 			private static final long serialVersionUID = 1L;
 		{
 			add("compatible_channels");
-			add("compatible_computer_operating_system");
+			add("computer_operating_system");
 			add("compatible_display_resolution");
 			add("compatible_display_type");
 			add("compatible_usb_version");
@@ -104,13 +110,16 @@ public class LabelUtils {
 			add("refresh_rate");
 			add("speed");
 			add("tagline");
-			add("size");
+			add("viewable_size");
+			add("total_size");
 			add("color");
 			add("modelnum");
 			add("compatible_refresh_rate");
 			add("weight");
 			add("compatible_color");
-			add("wattage");
+			add("wattage_operational");
+			add("wattage_standby");
+			add("yearly_consumption");
 			add("compatible_weight");
 			add("compatible_modelnum");
 			add("compatible_size");
@@ -118,54 +127,114 @@ public class LabelUtils {
 			add("power_supply");
 			add("voltage");
 			add("usb_ports");
+			add("hdmi_ports");
 			add("product_type");
 			add("compatible_power_supply");
 			add("compatible_usb_ports");
 			add("memory");
 			add("product code");
-			
+			add("series");	
+			add("tv_tuner");
+			add("pc_interface");
+			add("video_interface");
+			add("timer_functions");
+			add("width");
+			add("depth");
+			add("height");
+			add("image_aspect_ratio");	
+			add("motion_enhancement_technology");
+			add("24p_technology");
+			add("backlight_technology");
+			add("widescreen_modes");
+			add("viewing_angle");
+			add("supported_languages");
+			add("commercial_features");
+			add("stand_design");
+			add("stand_color");
+			add("analog_tv_tuner");
+			add("stereo_reception _system");
+			add("digital_tv_tuner");
+			add("input_video_formats");
+			add("supported_computer_resolution");
+			add("supported_video_formats");
+			add("supported_audio_formats");
+			add("supported_picture_formats");
+			add("remote_control_model");
+			add("digital_audio_format");
+			add("sound_effects");
+			add("speakers_qty");
+			add("speakers_type");
+			add("connectivity");
+			add("wifi_protocol");
+			add("warranty");
+			add("dimensions_with_stand");
+			add("dimensions_without_stand");
+			add("package_width");
+			add("package_depth");
+			add("package_height");
+			add("package_weight");
+			add("mpn");
+			add("product_gtin");
+			add("3d_technology");
+			add("internet_services");
+			add("image_contrast");
+			add("brightness");
+			add("response_time");
+			add("supported_memory_cards");
+			add("hdcp_compatability");
+			add("stand");
+			add("secondary_audio_program");
+			add("channel_lock");
+			add("closed_caption_capability");
+			add("audio_surround");
+			add("dlna");
+			add("batteries_included");
+			add("3d");
+			add("builtin_dvd_player");
+
 		}});
 		
-		attributes.put("laptop", new ArrayList<String>(){
+		attributes.put("headphone", new ArrayList<String>(){
 			private static final long serialVersionUID = 1L;
 
 		{
-			add("compatible_core_count");
-			add("count");
-			add("power_source");
-			add("usb_version");
-			add("compatible_product_type");
-			add("display_size");
-			add("core_count");
 			add("product_type");
-			add("usb_ports");
-			add("brand");
-			add("computer_processor_type");
-			add("computer_operating_system");
-			add("tagline");
-			add("computer_cpu_speed");
-			add("speed");
-			add("compatible_display_size");
-			add("hard_disk_size");
-			add("compatible_hard_disk_size");
-			add("compatible_brand");
-			add("compatible_speed");
+			add("width");
+			add("depth");
+			add("height");
+			add("compatibility");
+			add("series");
+			add("weight");
 			add("color");
-			add("size");
-			add("compatible_computer_processor_type");
-			add("ram");
-			add("compatible_size");
-			add("modelnum");
-			add("voltage");
-			add("memory");
-			add("compatible_color");
-			add("power_supply");
-			add("wattage");
-			add("compatible_ram");
-			add("compatible_memory");
-			add("compatible_computer_operating_system");
-			add("compatible_computer_cpu_speed");
-			add("product code");
+			add("headphones_form_factor");
+			add("headphones_cup_type");
+			add("microphone_sensitivity");
+			add("microphone_response");
+			add("microphone_audio_details");
+			add("headphones_technology");
+			add("connectivity_technology");
+			add("sound_output_mode");
+			add("frequency_response");
+			add("max_input_power");
+			add("sensitivity");
+			add("thd");
+			add("diaphragm");
+			add("impedance");
+			add("magnet_material");
+			add("controls");
+			add("cables_included");
+			add("included_accessories");
+			add("compliant_standards");
+			add("warranty");
+			add("brand");
+			add("mpn");
+			add("product_gtin");
+			add("color");
+			add("foldable");
+			add("microphone");
+			add("detachable_cable");
+
+
 		}});
 		
 		attributes.put("mobile_phone", new ArrayList<String>(){			 
@@ -173,36 +242,105 @@ public class LabelUtils {
 		{
 			
 			add("ram");
-			add("water_resistance");
-			add("memory");
-			add("brand");
-			add("phone_type");
-			add("computer_operating_system");
-			add("phone_carrier");
-			add("product_type");
-			add("tagline");
-			add("core_count");
-			add("processor_type");
-			add("color");
-			add("wattage");
-			add("power_supply");
-			add("display_size");
-			add("display_resolution");
-			add("voltage");
-			add("modelnum_mpn");
-			add("modelnum");
-			add("width");
-			add("height");
-			add("depth");
-			add("weight");
-			add("dimensions");
+			add("alert_types");
+			add("audio_connectors");
+			add("band_mode");
+			add("battery_type");
+			add("bluetooth_type");
 			add("body_material");
-			add("rear_cam_resolution");
+			add("brand");
+			add("box");
+			add("browser_type");
+			add("bundled_items");
+			add("camera_flash");
+			add("camera_type");
+			add("card_slot");
+			add("cellular");
+			add("chipset");
+			add("color");
+			add("computer_operating_system");
+			add("condition");
+			add("connectivity");
+			add("core_count");
+			add("depth");
+			add("design");
+			add("dimensions");
+			add("display_color");
+			add("display_format");
+			add("display_resolution");
+			add("display_size");
+			add("display_protection");
+			add("display_type");
+			add("display_technology");
 			add("front_cam_resolution");
+			add("general_memory");
+			add("gpu");
+			add("gps_type");
+			add("language");
+			add("launch_status");
+			add("launch_date");
+			add("loudspeaker");
+			add("height");
+			add("manufacturer");
+			add("manufacturer_origin");
+			add("memory");
+			add("messaging");
+			add("modelnum");
+			add("mpn");
+			add("network_technology");
+			add("network_generation");	
+			add("package_height");
+			add("package_unit_type");
+			add("package_weight");
 			add("package_dimensions");
+			add("phone_carrier");
+			add("phone_type");
+			add("power_supply");
+			add("processor_type");
+			add("processor_manufacturer");
 			add("product_code");
 			add("product_gtin");
-			add("manufacturer");
+			add("product_type");
+			add("price");
+			add("radio");
+			add("rear_cam_resolution");
+			add("sensors");
+			add("shipping");
+			add("SIM_card_quantity");
+			add("SIM_type");
+			add("tagline");
+			add("store_options");
+			add("standby_time");
+			add("software");
+			add("talk_time");
+			add("touchscreen_type");
+			add("video_definition");
+			add("video_quality");
+			add("voltage");
+			add("wattage");
+			add("weight");
+			add("width");
+			add("wlan");
+			add("usb");
+			add("unlocked");
+			add("multitouch");
+			add("nfc");
+			add("infrared_port");
+			add("is_customized");
+			add("java");
+			add("google_play");
+			add("3.5mm_jack");
+			add("bluetooth");
+			add("gps");
+			add("water_resistance");
+			add("browser");
+			add("speakerphone");
+			add("email");
+			add("digital_camera");
+			add("touch_screen");
+			add("QWERTY_physical_keyboard");
+			add("wifi");
+			add("auto_focus");
 
 		}});
 		
@@ -240,5 +378,43 @@ public class LabelUtils {
 		 
 		 
 		
+	}
+
+	
+	public boolean checkOverstockTable(String path) throws IOException {
+		File file_ = new File(path);
+		Document doc = Jsoup.parse(file_,"UTF-8") ;
+		//div[class=listing category_templates clearfix shelfListing  multiSaveListing]
+		Element firstTable = doc.select("table[class=table table-dotted table-extended table-header translation-table]").first();
+		Element content = firstTable.select("tbody").first();
+		boolean onlyEnglish= true;
+		if(null!=content){
+			Elements items = content.select("tr");
+			for(Element item:items){
+				Elements values= item.select("td");
+				if(values.size()!= 2) continue;			
+				String lang= langDetector(values.get(0).text());
+				if(!lang.equals("English")){
+					System.out.println(values.get(0).text()+":"+lang);
+					onlyEnglish=false;
+				}
+			}			
+		} 
+		//table table-dotted table-header
+		Element secondTable = doc.select("table[class=table table-dotted table-header]").first();
+		Elements seconditems = secondTable.select("tr");
+		if(null!=content){
+			for(Element item:seconditems){
+				Elements values= item.select("td");
+				if(values.size()!= 2) continue;			
+				String lang= langDetector(values.get(0).text());
+				if(!lang.equals("English")){
+					System.out.println(values.get(0).text()+":"+lang);
+					onlyEnglish=false;
+				}
+			}
+			
+		} 
+		return onlyEnglish;
 	}
 }
