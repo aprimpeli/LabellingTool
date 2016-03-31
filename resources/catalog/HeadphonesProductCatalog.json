@@ -37,7 +37,7 @@
     "product_gtin":"00042406196956, 00042406196970",
     "aditional_features": "detachable cable, noise isolating",
     "urls":[
-      {"value": "http://headphones.specout.com/l/312/Shure-SE215"}, {"value": "http://www.shure.com/americas/products/earphones/se-earphones/se215-sound-isolating-earphones"}
+      {"value": "http://headphones.specout.com/l/312/Shure-SE215"}, {"value": "http://www.shure.com/americas/products/earphones/se-earphones/se215-sound-isolating-earphones"}, {"value":"https://www.google.com/shopping/product/3549019289434239480/specs?q=Shure+SE215&prds=paur:ClkAsKraXwAhbGFCNza5TCt1VQeYwfXuGo_27M1bUsBFNtyM5F2VKZ6n5q3-km7GoWTBacarbOV_4ihBijLkpkz6-V-SP7qR43cfIsy7wPqJ0Q1MPYAGxnsihxIZAFPVH71tnrRRE03RxxjyxEmevswKgDcS8g&sa=X&ved=0ahUKEwjv0JnoxerLAhVEwQ4KHaS1B20Q6iQIwAE"}
     ]
   },
   {
@@ -77,7 +77,7 @@
     "mpn":"ATH M-50X, ATH-M50x BK (Black), AtATH-M50x",
     "product_gtin":"04961310125431",
     "urls":[
-      {"value": "http://www.audio-technica.com/cms/headphones/99aff89488ddd6b1"}, {"value": "http://www.cnet.com/products/audio-technica-ath-m50x/specs/"}
+      {"value": "http://www.audio-technica.com/cms/headphones/99aff89488ddd6b1"}, {"value": "http://www.cnet.com/products/audio-technica-ath-m50x/specs/"} ,{"value":"https://www.google.com/shopping/product/16113548241530740241/specs?q=Audio+Technica+ATH-M50X&prds=paur:ClkAsKraX9Up2NK_CblRqcbMCISzpgh456TirF29JTiFYThuBOmBL1ETss0Ne2sqlC5b7Q2Vix0o9ZvRKoHfNtGG4SurEAc6yslwsC8BxZnJyQEKUGkqoPkIHxIZAFPVH73CVKDisBPq8-8SmPFuiFSoCG1pcw&sa=X&ved=0ahUKEwjQhsjOxurLAhWCIA8KHZuWA2kQ6iQIwAE"}
     ]
   },
   {
@@ -117,7 +117,7 @@
     "mpn":"SRH440",
     "product_gtin":"00042406168601, 00042406171908, 00042406171946",
     "urls":[
-      {"value": "http://www.cnet.com/products/shure-srh440/specs/"}, {"value": "http://www.cnet.com/products/audio-technica-ath-m50x/specs/"}
+      {"value": "http://www.cnet.com/products/shure-srh440/specs/"}, {"value": "http://www.cnet.com/products/audio-technica-ath-m50x/specs/"}, {"value":"https://www.google.com/shopping/product/15430249043781246379/specs?q=Shure+SRH440&prds=paur:ClkAsKraX2IHKHpIckWcAJjHRsHBvTahiK-terUQCc0yVHnsc8mpoZ7wk60v1S6_-qPAG_7_Mk8VH88C6oMGxPv3CJabVyn7I-IyV7u5KBgaomA_umVrX-X3qxIZAFPVH73nkeUo8MV3KPjsJ8ToHf6K-4NyTg&sa=X&ved=0ahUKEwiuzND-xurLAhVG4w4KHUxHAiQQ6iQIugE"}
     ]
   },
   {
@@ -157,7 +157,7 @@
     "mpn":"sr60e",
     "product_gtin":"00182092000851",
     "urls":[
-      {"value": "http://www.headphone.com/products/grado-sr-60e"}, {"value": "http://headphones.specout.com/l/325/Grado-SR60"}
+      {"value": "http://www.headphone.com/products/grado-sr-60e"}, {"value": "http://headphones.specout.com/l/325/Grado-SR60"} , {"value":"https://www.google.com/shopping/product/13720940502150181002/specs?q=Grado+SR+60e&prds=paur:ClkAsKraX39GFxLDtnggqLT5RY4Jt1RGqsOQNzT7Zcv23fFKWXTsOiSbtSzVOAf_0EcAczrc1PentxK9ZfpJwm_C8sbd_yURJIUQE-d-F__w0pCATqrYgyFI6xIZAFPVH707AZFwI5nKkLBm3r8u6klxeQT5vA&sa=X&ved=0ahUKEwiUmK6fx-rLAhVCog4KHYffDZoQ6iQIqQE"}
     ]
   },
   {
@@ -197,7 +197,7 @@
     "mpn":"CX 3.00 RED, CX 3.00 Red",
     "product_gtin":"00615104257948",
     "urls":[
-      {"value": "http://en-de.sennheiser.com/in-ear-headphones-cx-3-00"}, {"value": "http://www.headphone.com/products/sennheiser-cx-3-00"}
+      {"value": "http://en-de.sennheiser.com/in-ear-headphones-cx-3-00"}, {"value": "http://www.headphone.com/products/sennheiser-cx-3-00"} , {"value":"https://www.google.com/shopping/product/6006803575100026494/specs?q=Sennheiser+CX+3.00&prds=paur:ClkAsKraX9vbe-pEUElRD633ytCAKWfsxp2-QQNavlsX6xTOGmxkgk2r0t1aCV4T_MqP6DCelTnhBp3SRLDZ-Ul6-AxgQnqJa8_NUxMaAwmbieXQjV6hwsErGBIZAFPVH73NglGF9Y69nO6o5cUtonSHzrZJUQ&sa=X&ved=0ahUKEwiDv7K1x-rLAhWI6g4KHV7SBLgQ6iQIrQE"}
     ]
   },
   {
@@ -237,7 +237,7 @@
     "mpn":"506395",
     "product_gtin":"00615104263406",
     "urls":[
-      {"value": "http://www.cnet.com/products/sennheiser-momentum-2-0/specs/"}
+      {"value": "http://www.cnet.com/products/sennheiser-momentum-2-0/specs/"}, {"value":"https://www.google.com/shopping/product/14741886176294784200?hl=en&q=Sennheiser+Momentum+2.0&prds=hsec:specs,paur:ClkAsKraXzB8tUdx3UAs0uke0q-o9JUS2-1iHw_2LvLoALAve1sA006TvawSuw3FNe3sbocWY6k0o5UWCYK9X9num4am2cIb9-pCBY4mMok57i4hRcEAoZ6mPRIZAFPVH71uJSmmKm9vMNdRD_YNr6dyA9iZCw&ved=0ahUKEwiOzcDEl8XLAhVEMJoKHd1FCUMQ4SsIDCgD&ei=Zk7pVo6CMcTg6ATdi6WYBA"}
     ]
   },
   {
@@ -277,7 +277,7 @@
     "mpn":"",
     "product_gtin":"0898072002387",
     "urls":[
-      {"value": "http://www.headphone.com/products/oppo-pm-3-closed-back-planar-magnetic-headphones"}, {"value": "http://www.cnet.com/products/oppo-pm-3/specs/"}, {"value": "http://www.upcindex.com/898072002387"}
+      {"value": "http://www.headphone.com/products/oppo-pm-3-closed-back-planar-magnetic-headphones"}, {"value": "http://www.cnet.com/products/oppo-pm-3/specs/"}, {"value": "http://www.upcindex.com/898072002387"}, {"value":"http://www.audioadvisor.com/prodinfo.asp?number=OPPM3&variation=BLKWOM"}
     ]
   },
   {
@@ -317,7 +317,7 @@
     "mpn":"SE425, SE425-V",
     "product_gtin":"00042406178518, 00042406178549",
     "urls":[
-      {"value": "http://headphones.specout.com/l/68/Shure-SE425"}
+      {"value": "http://headphones.specout.com/l/68/Shure-SE425"} , {"value":"https://www.google.com/shopping/product/7145715956428253828/specs?hl=en&q=Shure+SE425&prds=paur:ClkAsKraX0aG_hRW9DInf19fYqdoYpGCiTntJf6B9PwBqsM1vU8e_uvKx5suTYgbustkyMUkG4fxvLX977CoVXOq0wl0ZqeK4o1KRUrQtRYCUJuSUvpak-6vABIZAFPVH72vmsnaNksySmO6GJt6V_ZSOLqpfw&sa=X&ved=0ahUKEwja9tXHmcXLAhWqIpoKHV3HDj8Q6iQItQE"}
     ]
   },
   {
@@ -357,7 +357,7 @@
     "mpn":"009969, 09969, 650, 9969, HD 650 Demo, HD-650, SEAHD650, USED005002 HD650",
     "product_gtin":"00615104099692, 00888365000565, 04012418099695",
     "urls":[
-      {"value": "http://en-us.sennheiser.com/high-quality-headphones-around-ear-audio-surround-hd-650"}, {"value": "http://www.engadget.com/products/sennheiser/hd/650/specs/"}
+      {"value": "http://en-us.sennheiser.com/high-quality-headphones-around-ear-audio-surround-hd-650"}, {"value": "http://www.engadget.com/products/sennheiser/hd/650/specs/"} , {"value":"https://www.google.com/shopping/product/9500390551100581947/specs?hl=en&q=Sennheiser+HD+650&prds=paur:ClkAsKraX44uG3Tzkm5EL3GBydICYETEG3SEuBERvjlQ3mkSbFeOI8aQLhTibFta76hjMzCZWOTzAsaJ8yYbMJ2N9Yl9CKcOPVt-_7Grt6T-MLR7Af5pn21cuBIZAFPVH71e-9uV-IBHeNiunaIJ1SBHzBduKw&sa=X&ved=0ahUKEwik4K72mcXLAhXsa5oKHef9DooQ6iQIugE"}
     ]
   },
   {
@@ -397,7 +397,7 @@
     "mpn":"2458Z00140, K712PRO, K712PRO 2458Z00140",
     "product_gtin":"00885038035688",
     "urls":[
-      {"value": "http://www.akg.com/pro/p/k712pro"}, {"value": "http://www.cnet.com/products/akg-k712-pro-headphones/specs/"}
+      {"value": "http://www.akg.com/pro/p/k712pro"}, {"value": "http://www.cnet.com/products/akg-k712-pro-headphones/specs/"} , {"value":"https://www.google.com/shopping/product/3514875126032014022/specs?hl=en&q=AKG+K712+Pro&prds=paur:ClkAsKraXzv6bbufSFZ6dC5I43n7pB72ztfjoALzc9gGM1lZmuaLQwhn_JteYCN0a3FAXF8XHaBVxWmG4NxBcbjigbqbtONHPd3yNdnHtawyGe4DxN3QyNAwRRIZAFPVH702_ylJxaQXlaBzq3bITr18hkG2xg&sa=X&ved=0ahUKEwilw8fMyerLAhVG_g4KHfDoASIQ6iQIqgE"}
     ]
   }
 ]
