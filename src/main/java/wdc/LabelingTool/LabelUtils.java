@@ -191,6 +191,8 @@ public class LabelUtils {
 			add("batteries_included");
 			add("3d");
 			add("builtin_dvd_player");
+			add("model");
+			add("year_of_manufacture");
 
 		}});
 		
@@ -233,6 +235,10 @@ public class LabelUtils {
 			add("foldable");
 			add("microphone");
 			add("detachable_cable");
+			add("model");
+			add("condition");
+			add("headphone_use");
+			add("tagline");
 
 
 		}});

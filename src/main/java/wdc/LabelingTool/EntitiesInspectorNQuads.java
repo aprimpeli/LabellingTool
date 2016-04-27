@@ -24,6 +24,7 @@ import com.cybozu.labs.langdetect.DetectorFactory;
 
 import de.dwslab.dwslib.util.io.InputUtil;
 import de.dwslab.dwslib.util.io.OutputUtil;
+import de.jollyday.config.Which;
 import de.wbsg.loddesc.util.DomainUtils;
 
 public class EntitiesInspectorNQuads extends EntityProcessor{
@@ -43,6 +44,8 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 	static String currentNQFile;
 	static int entitiesTobeSearched=0;
 	static String resultFile= "NQuadsProductResultsFiltered.txt";
+	static String whichProducts;
+	static ArrayList<String> subjects;
 	
 	public static void run(String whichProducts, String quadsFolder) throws Exception{			
 		//for the language detection
@@ -67,9 +70,14 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 
 	public static void main(String[] args) throws Exception {
 		//get which products you want to retrieve (test, tv, laptop, mobiles, all)
-		String whichProducts="headset";
+		whichProducts="mobile_phone";
+		if(!(whichProducts.equals("headset")||whichProducts.equals("television")||whichProducts.equals("mobile_phone"))){
+			System.out.println("Check the product category. It can only be headset, mobile_phone or television");
+			System.exit(0);
+		}
+			
 		//path to the guads file
-		String quadsFolder= "C:\\Users\\Anna\\Documents\\Student Job - DWS\\LabellingTool\\headphones-data\\nq";
+		String quadsFolder= "C:\\Users\\Anna\\Documents\\Student Job - DWS\\LabellingTool\\phone-data\\nq";
 		
 		//for the language detection
 		DetectorFactory.loadProfile("resources\\LanguageDetection\\profiles");			
@@ -128,16 +136,15 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 
 		//list all files in quads directory		
 		EntitiesInspectorNQuads processor= new EntitiesInspectorNQuads(folderPath,"resources/output.txt",1);
+		subjects=new ArrayList<String>();
 		List<File> inputFiles = processor.fillListToProcess();	
 		NQProcessor sort = new NQProcessor();
 		for (File f:inputFiles){
 			System.out.println("Process file:"+f.getName());
+			System.out.println(f.getName());
 			//the process method only loads the map of entities 
 			currentNQFile=f.getName();
-			System.out.println("Sort the file first");
-			sort.sortLinesOfFile(f.getPath());
-			File sortedFile= new File("resources/sortedNQFile.gz");
-			processor.process(sortedFile);			
+			processor.process(f);			
 		}
 		
 	}
@@ -148,20 +155,22 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 			try{
 				
 				String subject = e.getSubject().value();
+		
 				String title="";
 				String description="";
 				Map<String,List<NodeTrait>> predicates = e.getProperties();
 				boolean toBeSearched=false;
-				
+				String url=e.getGraph();
+
 				
 					
-//					for(Map.Entry<String, List<NodeTrait>> p: predicates.entrySet()){
-//						System.out.println(p.getKey());
-//						for(NodeTrait n:p.getValue()){
-//							System.out.println(n.toString());
-//							System.out.println(n.value());
+//						for(Map.Entry<String, List<NodeTrait>> p: predicates.entrySet()){
+//							System.out.println(p.getKey());
+//							for(NodeTrait n:p.getValue()){
+//								System.out.println(n.toString());
+//								System.out.println(n.value());
+//							}
 //						}
-//					}
 				
 
 				
@@ -181,8 +190,8 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 				if(toBeSearched){
 					entitiesTobeSearched++;
 					for (String product:products){
-						if(product.equals("sony xbr43v830c")) {
-							System.out.println("watch out");}
+											
+						
 						//calculate containment of arraylists
 						String pr_description = description.toLowerCase().trim();
 						
@@ -191,15 +200,17 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 						ArrayList<String> descriptionAsArray = new ArrayList<String>(Arrays.asList(pr_description.split(" ")));
 						ArrayList<String> titleAsArray = new ArrayList<String>(Arrays.asList(pr_title.split(" ")));
 
+						//WATCH OUT - the url condition should apply only for the tvs
 						if ((descriptionAsArray.containsAll(productAsArray) || titleAsArray.containsAll(productAsArray)) ||
-								(pr_description.contains(product.toLowerCase()))	)		
+								(pr_description.contains(product.toLowerCase()) || 
+										(url.toLowerCase().contains(product.toLowerCase())&& whichProducts.equals("television")) )	)		
 						{
 						//replace with the previous line if you want to be more flexible when it comes to the title
-//						if ((description.toLowerCase().trim().contains(product.toLowerCase())) || 
-//								title.toLowerCase().trim().contains(product.toLowerCase())){
+//							if ((description.toLowerCase().trim().contains(product.toLowerCase())) || 
+//									title.toLowerCase().trim().contains(product.toLowerCase())){
 						//choose one of the three if clauses above
-//								if (predicate.endsWith("/name") && object.toLowerCase().equals(product.toLowerCase())){
-//									//get uri and pld
+//									if (predicate.endsWith("/name") && object.toLowerCase().equals(product.toLowerCase())){
+//										//get uri and pld
 							boolean containsCrappyWord=false;
 							for(String forbidden:forbiddenWords){
 								if (pr_title.contains(forbidden)) {
@@ -207,10 +218,9 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 									break;
 								}
 							}
-							if (containsCrappyWord) continue;
-							
+							//get accessories by putting negation here
+							if (!containsCrappyWord) continue;
 							//URL
-							String url=e.getGraph();
 							String domain = de.wbsg.loddesc.util.DomainUtils.getDomain(url);
 							String pld = DomainUtils.getPayLevelDomain(domain);	
 							
@@ -221,18 +231,24 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 							String lang=utils.langDetector(title+" "+description);
 							if(null==pld|| pld.equals("")) 
 								System.out.println(url+" Could not retrieve PLD");
-//							System.out.println(subject+"|"+product+"|"+url+"|"+pld+"|gtin13:"+gtin13+"|gtin14:"+gtin14+"|title:"+title+"|description:"+
-//								description+"|"+lang+"|"+currentNQFile);
+//								System.out.println(subject+"|"+product+"|"+url+"|"+pld+"|gtin13:"+gtin13+"|gtin14:"+gtin14+"|title:"+title+"|description:"+
+//									description+"|"+lang+"|"+currentNQFile);
 							//check for forbidden words - comment out if you dont wont it
 							
 							
 							String toBeAppended= subject+"||"+product+"||"+url+"||"+pld+"||gtin13:"+gtin13+"||gtin14:"+gtin14+"||title:"+title+"||description:"+
 									description+"||"+lang+"||"+currentNQFile;
-							writer.append(toBeAppended.replaceAll("(\\r|\\n|\\r\\n)+", "\\\\n"));
-							writer.newLine();						
-						}						
+							if(!subjects.contains(subject)){
+								EntitiesInspectorNQuads.subjects.add(subject);
+								writer.append(toBeAppended.replaceAll("(\\r|\\n|\\r\\n)+", "\\\\n"));
+								writer.newLine();
+							}
+													
+													
+						}
 					}
 				}
+				
 				
 			}
 			
@@ -334,16 +350,16 @@ public class EntitiesInspectorNQuads extends EntityProcessor{
 			requiredList = new ArrayList<String>() {
 				private static final long serialVersionUID = 1L;
 			{
-			    add("Sony XBR43X830C");
-			    add("LG 55EG9600");
-			    add("LG 65EG9600");
-			    add("Sony XBR55X850D");
-			    add("Samsung UN50HU6900F");
-			    add("Samsung UN40JU6400F");
-			    add("Gpx Tde1384b");
-			    add("Samsung UN60JS7000F");
-			    add("VIZIO D43-C1");
-			    add("LG 43UF6400");
+			    add("XBR43X830C");
+			    add("55EG9600");
+			    add("65EG9600");
+			    add("XBR55X850D");
+			    add("UN50HU6900F");
+			    add("UN40JU6400F");
+			    add("Tde1384b");
+			    add("UN60JS7000F");
+			    add("D43-C1");
+			    add("43UF6400");
 			    
 			}};
 			allProducts.addAll(requiredList);

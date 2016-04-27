@@ -32,7 +32,7 @@ public class FeatureLabelinginHTML {
 	static Annotation label;
 	
 	static String outputFile="resources/JSON_LabelingOutput.txt";
-	static String productsPath="C:\\Users\\Anna\\Google Drive\\Master_Thesis\\DataToBeUsed\\CrawlerData\\phones\\part5_nq.txt";
+	static String productsPath="resources/NQuadsProductResultsFiltered.txt";
 	static String specFile = "resources/specificationQUADS.txt";
 	static String nqFileMap = "resources/nqFileMap.txt";
 	static String warcPath= "C:\\Users\\Anna\\Documents\\Student Job - DWS\\LabellingTool\\phone-data\\warc";
@@ -70,7 +70,6 @@ public class FeatureLabelinginHTML {
 			if(!language.equals("English")) continue;
 			String url=line.split(sep)[2];
 			String pld= line.split(sep)[3];
-			if(pld.equals("ebay.com")) continue;
 			if(labeledUrls.contains(url)) System.out.println("URL: "+url+" appears twice! Please check!");
 			labeledUrls.add(url);
 			String nqFile=line.split(sep)[9];
@@ -100,40 +99,42 @@ public class FeatureLabelinginHTML {
 			else htmlPagesNames.put(productName, count+1);
 
 			String htmlContent = EntitiesInspectorWARC.getHTMLContentOfWARC(warcPath, nqFile.replace(".nq", ""), url);
-			tempHTML = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("resources/htmlPages/"+
-			productName+"_"+htmlPagesNames.get(productName)+".html"), "UTF-8"));
-			
-			//keep track of the mapping between the files and the nq lines
-			nqFilemappings.append(productName+"_"+htmlPagesNames.get(productName)+".html"+"||||"+line);
-			nqFilemappings.newLine();
-			
-			tempHTML.append(htmlContent);
-			tempHTML.flush();
-			tempHTML.close();
-			//search in warc
-			System.out.println("Does it include specifications? : resources/tempHTML.html");
-			//String includes=sc.next(); 
-			String includes="yes"; //to be deleted replace with the line above
-			if(includes.equals("yes")){
-				specificationquads.append(line);
-				specificationquads.newLine();
-				
-				System.out.println("Label the product?");
-				//if(sc.next().equals("yes")){
-				if(false){//replace with the line above
-					System.out.println("The defined page includes specifications of mobile_phone, laptop or television? Type the relevant word");
-					currentProductType=sc.next();
-					//get the predefined Attributes
-					utils= new LabelUtils();
-					definedAttributes= utils.defineAttributes();
+			if(!htmlContent.equals(null)) {
+				tempHTML = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("resources/htmlPages/"+
+				productName+"_"+htmlPagesNames.get(productName)+".html"), "UTF-8"));
+				System.out.println("Created:"+"resources/htmlPages/"+
+						productName+"_"+htmlPagesNames.get(productName)+".html");
+				//keep track of the mapping between the files and the nq lines
+				nqFilemappings.append(productName+"_"+htmlPagesNames.get(productName)+".html"+"||||"+line);
+				nqFilemappings.newLine();
+				tempHTML.append(htmlContent);
+				tempHTML.flush();
+				tempHTML.close();
+
+				//search in warc
+				System.out.println("Does it include specifications? : resources/tempHTML.html");
+				//String includes=sc.next(); 
+				String includes="yes"; //to be deleted replace with the line above
+				if(includes.equals("yes")){
+					specificationquads.append(line);
+					specificationquads.newLine();
 					
-					while (!(currentProductType.equals("mobile_phone") || currentProductType.equals("laptop") 
-							|| currentProductType.equals("television"))){
-						System.out.println("Please type mobile_phone OR laptop or television");
+					System.out.println("Label the product?");
+					//if(sc.next().equals("yes")){
+					if(false){//replace with the line above
+						System.out.println("The defined page includes specifications of mobile_phone, laptop or television? Type the relevant word");
 						currentProductType=sc.next();
-					}
-					labeling.labelProduct(line, "resources/tempHTML.html");	
-				}} 
+						//get the predefined Attributes
+						utils= new LabelUtils();
+						definedAttributes= utils.defineAttributes();
+						
+						while (!(currentProductType.equals("mobile_phone") || currentProductType.equals("laptop") 
+								|| currentProductType.equals("television"))){
+							System.out.println("Please type mobile_phone OR laptop or television");
+							currentProductType=sc.next();
+						}
+						labeling.labelProduct(line, "resources/tempHTML.html");	
+					}} }
 			}
 			catch(Exception e){
 				System.out.println("Line: "+line+" could not be parsed");
@@ -172,12 +173,17 @@ public class FeatureLabelinginHTML {
 			while ((  line = reader.readLine()) != null) {
 				String fileName= line.split("\\|\\|\\|\\|")[0];
 				if(fileName.equals(listOfFiles[i].getName())){
-					if (fileName.equals("iphone 5_14.html")) passed=true;
+					if (fileName.equals("d43-c1_29.html")) passed=true;
 					if(!passed) continue;
+					//if (fileName.contains("iphone") ) continue;
+
 					System.out.println(line);
 					String []info = line.split("\\|\\|\\|\\|")[1].split("\\|\\|");
 				    String lang = info[info.length-2].trim();
 				    String pld = info[3];
+				    String title= info[6];
+				    //only for tvs - please comment out
+				    if(title.toLowerCase().contains("board") || title.toLowerCase().contains("stand"))continue;
 			    
 				    if (lang.equals("English")  ){
 				    	System.out.println(listOfFiles[i].getAbsolutePath());
@@ -416,6 +422,7 @@ public class FeatureLabelinginHTML {
 					}
 				}
 			}
+			
 			System.out.println("Are the tables complete? (yes/no)");
 			input = new Scanner(System.in);
 			if(input.nextLine().equals("no")) ownParse("table");
@@ -424,7 +431,6 @@ public class FeatureLabelinginHTML {
 				if(!mapsDone)
 					System.out.println("Continue with labelling");
 			}
-						
 		}
 		else if (pld.equals("overstock.com")){
 			File file_ = new File(file);
@@ -480,7 +486,7 @@ public class FeatureLabelinginHTML {
 					System.out.println("Continue with labelling");
 			}
 		}
-		if (pld.equals("tesco.com")){
+		else if (pld.equals("tesco.com")){
 			File file_ = new File(file);
 			Document doc = Jsoup.parse(file_,"UTF-8") ;
 			Element table = doc.select("div[id=product-spec-section-content]").first();
@@ -619,14 +625,34 @@ public class FeatureLabelinginHTML {
 		ArrayList<String> tokens = new ArrayList<String>();
 		tokens=utils.tokenizer(text);
 		Set<String> labels = new HashSet<String>();
-		System.out.println("Give for every token the right labelling. Type next if you don't want to label the current token");
-		for (String t:tokens){
-			System.out.print(t+":");
-			String label = sc.next();
-			if(label.equals("next")) continue;
-			tokensWithLabels.add(label+":"+t);
-			labels.add(label);
+		if(!isTitle){
+			System.out.println("Do you want to give every word the tagline label? Recommended for long descriptions, Then you can manually change some of the words' labels");
+			if(sc.next().equals("yes")){
+				for (String t:tokens){
+					tokensWithLabels.add("tagline"+":"+t);
+				}
+			}
+			else {
+				for (String t:tokens){
+					System.out.print(t+":");
+					String label = sc.next();
+					if(label.equals("next")) continue;
+					tokensWithLabels.add(label+":"+t);
+					labels.add(label);
+				}
+			}
 		}
+		else{
+			System.out.println("Give for every token the right labelling. Type next if you don't want to label the current token");
+			for (String t:tokens){
+				System.out.print(t+":");
+				String label = sc.next();
+				if(label.equals("next")) continue;
+				tokensWithLabels.add(label+":"+t);
+				labels.add(label);
+			}
+		}
+		
 		if(isTitle) label.getTitle_atts().addAll(tokensWithLabels);
 		else label.getDesc_atts().addAll(tokensWithLabels);
 		mapUndefinedLabels(labels);
