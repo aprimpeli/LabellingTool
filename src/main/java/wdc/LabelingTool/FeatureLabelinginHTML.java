@@ -164,7 +164,6 @@ public class FeatureLabelinginHTML {
 		File folder = new File(directory);
 		File[] listOfFiles = folder.listFiles();
 		System.out.println("Number of html files in the directory:"+listOfFiles.length);
-		boolean passed= false;
 
 		for (int i = 0; i < listOfFiles.length; i++) {
 	    	
@@ -173,9 +172,6 @@ public class FeatureLabelinginHTML {
 			while ((  line = reader.readLine()) != null) {
 				String fileName= line.split("\\|\\|\\|\\|")[0];
 				if(fileName.equals(listOfFiles[i].getName())){
-					if (fileName.equals("d43-c1_29.html")) passed=true;
-					if(!passed) continue;
-					//if (fileName.contains("iphone") ) continue;
 
 					System.out.println(line);
 					String []info = line.split("\\|\\|\\|\\|")[1].split("\\|\\|");
@@ -511,6 +507,8 @@ public class FeatureLabelinginHTML {
 						label.setTable_atts(tempList);	
 					}
 				}	
+				
+				
 				System.out.println("Are the tables complete? (yes/no)");
 				input = new Scanner(System.in);
 				if(input.nextLine().equals("no")) ownParse("table");
@@ -520,6 +518,82 @@ public class FeatureLabelinginHTML {
 						System.out.println("Continue with labelling");
 				}
 			}
+		}
+		else if (pld.equals("alibaba.com")){
+			input = new Scanner(System.in);
+
+			File file_ = new File(file);
+			Document doc = Jsoup.parse(file_,"UTF-8") ;
+
+			Elements labelCells = doc.select("td[class=name J-name]");
+			Elements labelValues = doc.select("td[class=value J-value]");
+			if (labelCells.size()!= labelValues.size()) System.out.println("The labels size and the value size do not match. Please check the Alibaba wrapper.");
+			for(int i=0; i<labelCells.size(); i++){
+				String value= labelValues.get(i).text();
+				String label_ = labelCells.get(i).text().replace(":", "");
+				elementsOfTable.add(label_+":"+value);
+				labels.add(label_);
+				System.out.println(label_+":"+value);
+				
+				if(label.equals("mpn")) label.setMpn(value);
+
+				//add to the list 
+				if(structure.equals("table")){
+					ArrayList<String> tempList= label.getTable_atts();
+					tempList.add(label_+":"+value);
+					label.setTable_atts(tempList);	
+				}
+			}	
+			System.out.println("Want to label the second table as well?");
+			if(input.nextLine().equals("yes")){
+				Elements secondlabelValues = doc.select("table[class=aliDataTable]").select("td");
+				for(int i=0; i<secondlabelValues.size(); i=i+2){
+					String value= secondlabelValues.get(i+1).text();
+					String label_ = secondlabelValues.get(i).text();
+					elementsOfTable.add(label_+":"+value);
+					labels.add(label_);
+					System.out.println(label_+":"+value);
+					
+					if(label.equals("mpn")) label.setMpn(value);
+
+					//add to the list 
+					if(structure.equals("table")){
+						ArrayList<String> tempList= label.getTable_atts();
+						tempList.add(label_+":"+value);
+						label.setTable_atts(tempList);	
+					}
+				}	
+			}
+			
+			System.out.println("Are the tables complete? (yes/no)");
+			boolean mapped=false;
+			if(input.nextLine().equals("no")) {
+				System.out.println("Add more items or own parse?(more/own)");
+				if(input.nextLine().equals("own")) ownParse(structure);
+				else{
+					System.out.println("Add more elements like <feature1>:<value1>;<feature2>:<value2>");
+					String [] moreElements= input.nextLine().split(";");
+					for (int el=0; el<moreElements.length;el++)	{
+						elementsOfTable.add(moreElements[el]);
+						labels.add(moreElements[el].split(":")[0]);
+						ArrayList<String> tempList= label.getTable_atts();
+						tempList.add(moreElements[el]);
+						label.setTable_atts(tempList);
+						mapsDone = mapUndefinedLabels(labels);
+						mapped=true;
+						if(!mapsDone)
+							System.out.println("Continue with labelling");
+					}
+
+				}
+			}
+			else {
+				if (!mapped)
+					mapsDone = mapUndefinedLabels(labels);
+				if(!mapsDone)
+					System.out.println("Continue with labelling");
+			}
+			
 		}
 		else ownParse("table");
 				
