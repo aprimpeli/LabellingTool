@@ -1,7 +1,9 @@
 package wdc.Statistics;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -9,6 +11,8 @@ import com.google.common.collect.ListMultimap;
 public class StatisticsItem {
 	
 	
+	private HashMap<String, HashSet<String>> propertiesValues;
+
 	public StatisticsItem(){
 		 this.distinctPLDs = new HashMap<String,Integer>();
 		 this.uniqueProductsCount= new HashMap<String,Integer>();
@@ -23,6 +27,7 @@ public class StatisticsItem {
 		 this.propertiesFrequencyInDescription= new HashMap<String,Integer>();
 		 this.propertiesFrequencyInTables= new HashMap<String,Integer>();
 		 this.propertiesFrequencyInLists= new HashMap<String,Integer>();
+		 this.setPropertiesValues(new HashMap<String, HashSet<String>>());
 	}
 	public HashMap<String, Integer> getDistinctPLDs() {
 		return distinctPLDs;
@@ -157,7 +162,7 @@ public class StatisticsItem {
 	private HashMap<String, Integer> propertiesFrequencyInDescription;
 	private HashMap<String, Integer> propertiesFrequencyInTables;
 	private HashMap<String, Integer> propertiesFrequencyInLists;
-
+	
 	public void getInfo(){
 		System.out.println("---STATISTICS REPORT---");
 		System.out.println("Total labelled entities in file:"+this.totalEntities);
@@ -194,5 +199,20 @@ public class StatisticsItem {
 		for (Map.Entry<String, Integer> prop:getPropertiesFrequency().entrySet())
 			System.out.println(prop.getKey()+":"+prop.getValue()+" times");
 		
+		System.out.println("--Feature Value Pairs--");
+		for (Map.Entry<String, HashSet<String>> prop:getPropertiesValues().entrySet()){
+			String allValues ="";
+			for (String s:prop.getValue()) allValues+=s+";;;";
+			System.out.println(prop.getKey()+":"+allValues);
+
+		}
+		
+	}
+	
+	public HashMap<String, HashSet<String>> getPropertiesValues() {
+		return propertiesValues;
+	}
+	public void setPropertiesValues(HashMap<String, HashSet<String>> hashMap) {
+		this.propertiesValues = hashMap;
 	}
 }

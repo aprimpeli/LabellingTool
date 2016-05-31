@@ -8,8 +8,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,8 +20,8 @@ import org.json.JSONObject;
 
 public class PropertyStatistics {
 	
-	static String productCategory="phone";
-	String labelledFile="C:\\Users\\Anna\\Google Drive\\Master_Thesis\\2.ProfilingOfData\\LabelledDataProfiling\\CorrectedLabelledEntities\\PhonesLabelledEntitiesProcessed.txt";
+	static String productCategory="headphone";
+	String labelledFile="C:\\Users\\Johannes\\Google Drive\\Master_Thesis\\2.ProfilingOfData\\LabelledDataProfiling\\CorrectedLabelledEntities\\HeadphonesLabelledEntitiesProcessed.txt";
 	static StatisticsItem stats;
 	
 	public static void main (String args[]) throws JSONException, IOException, URISyntaxException{
@@ -91,10 +93,10 @@ public class PropertyStatistics {
 	public static void getPropertiesCount(JSONArray element_atts, boolean isTableOrList, JSONArray atts_map, String elementType){
 		
 		String feature_value_pairs[][] = new String [element_atts.length()][2];
+
 		for(int i = 0 ; i < element_atts.length() ; i++){
 			feature_value_pairs[i][0]=element_atts.get(i).toString().split(":")[0];
-			feature_value_pairs[i][1]=element_atts.get(i).toString().replace(feature_value_pairs[i][0]+":", "");
-
+			feature_value_pairs[i][1]=element_atts.get(i).toString().replace(feature_value_pairs[i][0]+":", "");			
 		}
 		
 		//get attributes map as hashTable
@@ -111,10 +113,13 @@ public class PropertyStatistics {
 		for(int i = 0 ; i < feature_value_pairs.length ; i++){
 			ArrayList<String> propertyValues = new ArrayList<String>();
 			//if table or list I need to get the mapped property
-			if(isTableOrList)
-				propertyValues=mapped_attributes.get(feature_value_pairs[i][0]);
-			else
+			if(isTableOrList){
+				propertyValues=mapped_attributes.get(feature_value_pairs[i][0]);			
+			}
+			else{
 				propertyValues.add(feature_value_pairs[i][0]);
+
+			}
 			
 			if(null!=propertyValues){
 				for(String propertyValue:propertyValues){
@@ -138,6 +143,13 @@ public class PropertyStatistics {
 						Integer count= stats.getPropertiesFrequencyInLists().get(propertyValue);
 						if(null==count) count=0;
 						stats.getPropertiesFrequencyInLists().put(propertyValue, ++count);
+					}
+					if (elementType.equals("table")){
+					if (null==stats.getPropertiesValues().get(propertyValue)) {
+
+						stats.getPropertiesValues().put(propertyValue, new HashSet<String>());
+					}
+					stats.getPropertiesValues().get(propertyValue).add(feature_value_pairs[i][1]);
 					}
 				}
 			}
